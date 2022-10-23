@@ -1,5 +1,11 @@
 package rfc7807
 
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
 // RFC7807 is a struct that represents the RFC7807 standard.
 type RFC7807 struct {
 	Type       string         `json:"type,omitempty"`
@@ -8,6 +14,14 @@ type RFC7807 struct {
 	Detail     string         `json:"detail,omitempty"`
 	Instance   string         `json:"instance,omitempty"`
 	Extensions map[string]any `json:"extensions,omitempty"`
+}
+
+// SimpleResponse writes a simple response with the RFC7807 struct to the provided writer.
+func SimpleResponse(w http.ResponseWriter, status int, title string) error {
+	e := NewError(fmt.Sprintf("%s: %s", statusCodes[status], title)).SetStatus(status)
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(e.Status)
+	return json.NewEncoder(w).Encode(e)
 }
 
 // NewError returns a new RFC7807 struct.
